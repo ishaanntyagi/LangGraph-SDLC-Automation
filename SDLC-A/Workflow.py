@@ -117,24 +117,23 @@ def system_design_node(state):
 def code_generation_node(state):
     print("The SystemDesign for the Requiremnent are as follows ")
     print(state["system_design"])
-    approval = input("Do You want to go ahead with the current System Design Or Should I ReGenerate The System Design")
+    approval = input("Do You want to go ahead with the current System Design = yes" "\n" " if You Want to Go back to to the System Design Node = no")
 
-    if approval ["y", "yes"]:
+    if approval == "yes":
         prompt = (
-            "You are a senior software engineer. Using the following system design, write the core code modules and main functions needed to implement the system. \n\n"
-            "Requirements:\n"
-            "- Follow best coding practices for organization, readability, and maintainability.\n"
-            "- Use modular code structure (split logic into appropriate classes or functions).\n"
-            "- Add comments above classes/functions and within complex code sections to explain logic in simple terms.\n"
-            "- Include only the code (no explanations outside comments).\n"
-            "- Implement realistic function signatures and sample data handling where needed.\n"
-            "- If any external dependencies/libraries are needed, show the import statements.\n"
-            "- Focus on the essential parts: initialization, data flow, major interactions, and how components connect.\n"
-            "- If the system requires configuration or environment setup, include a section of code for that.\n"
-            "- Do not generate test cases, documentation, or deployment scripts in this output.\n"
-            "- Assume the code will be reviewed by a beginner; prioritize clarity.\n\n"
-            f"System Design:\n{state['system_design']}\n"
-    )       #the prompt will Serve as a text that will be passed to the LLM Via tha api call and the prompt will be Generating the output as a code.
+        "You are a senior software engineer.\n"
+        "Given the system design below, generate the complete and functional code for the core modules and components required.\n\n"
+        "Instructions:\n"
+        "- Output all code necessary for a working prototype in a single response.\n"
+        "- If the system contains multiple files or modules, output them sequentially with clear file names as comments at the top (e.g., # filename.py).\n"
+        "- Do not leave any functions, classes, or main logic as placeholders; implement all key logic so that a beginner can run and understand the code.\n"
+        "- Add comments explaining complex sections, but keep the output focused on code only (no explanations outside comments).\n"
+        "- Include all necessary import statements and initialization code.\n"
+        "- If configuration or environment setup is needed, include it at the top as code comments.\n"
+        "- Make sure the output does not stop mid-function or mid-class. Finish all code blocks.\n"
+        "- Do not generate test cases or documentation here.\n\n"
+        f"System Design:\n{state['system_design']}\n"
+)       #the prompt will Serve as a text that will be passed to the LLM Via tha api call and the prompt will be Generating the output as a code.
         
         url = "http://localhost:11434/api/generate"
         payload = {
@@ -158,50 +157,96 @@ def code_generation_node(state):
         print("\n--- Generated Code ---")
         print(full_response)
         return state
-    else:
+    elif approval == "no":
         print("Regenerating system design as per your request...")
         # Optionally allow the user to revise the design request
         state = system_design_node(state)
         return code_generation_node(state)
+    
+    
+    
+def next_node_after_generation(state):
+    generated_code = state.get("generated_code", "")
+    print("\nWhat would you like to do next?")
+    print("1. Regenerate the code, if The Code is not Up to The mark")
+    print("2. Get an explanation of the Generated code")
+    print("3. Go to the next node in sequence, That is ")
+    user_choice = input("Enter the number of your choice (1/2/3): ").strip()
+     
+    if user_choice == 1:
+        print("Taking back to the Code generation Node" "\n")
+        state = code_generation_node(state)
+         
+    elif user_choice == 2:
+        state = code_explainer_node(state)
+        print("Explaining The code provided -->" "\n")
+        print(state.get("code_explanation"))
         
+    elif user_choice == 3:
+        print("nothing Yet , tbc")
+             
+        
+def code_explainer_node(state):
+    generated_code = state.get("generated_code", "")
+    if not generated_code:
+        print("No code found.")
+        return state 
+    
+    prompt = (
+        "You are a beginner-friendly coding tutor.\n"
+        "Explain the following code step by step, in very simple language.\n"
+        "Describe what each function does, how the code works, and the main ideas.\n"
+        "Do NOT repeat the code, just explain in plain English.\n\n"
+        f"Code:\n{generated_code}\n"
+    )
+      
+      
+    url = "http://localhost:11434/api/generate"
+    payload = {
+        "model": "gemma:2b",
+        "prompt": prompt
+    }
+    
+    response = requests.post(url, json=payload, stream=True)
+    full_response = ""
+    
+    for line in response.iter_lines():
+            if line:
+                data = json.loads(line.decode('utf-8'))
+                if "response" in data:
+                    print(data["response"], end='', flush=True)
+                    full_response += data["response"]
+                if data.get("done", False):
+                    break
+    print()
+    state["code_explanation"] = full_response
+    return state 
 
+    
+    
+if __name__ == "__main__":
+    state = {}
+    # DuckDuckGo/Wikipedia info node
+    info_choice = input("Do you want to fetch info from Wikipedia or DuckDuckGo? (Type 'wikipedia' or 'duckduckgo'): ").strip().lower()
+    if info_choice in ["wikipedia", "duckduckgo"]:
+        state["info_source"] = info_choice
+    state = info_node(state)
+    print(f"Summary from {state['info_source'].capitalize()}:")
+    print(state["info_summary"])
 
+    state = requirements_node(state)       
+    state = manual_story_node(state)       
+    state = system_design_node(state)      
 
+    print("\n--- Final System Design ---")
+    print(state["system_design"])
 
+    # 4. Generate code from approved system design
+    state = code_generation_node(state)    # 4. Generate code with approval
 
+    print("\n--- Generated Code ---")
+    print(state.get("generated_code", "No code generated."))
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# if __name__ == "__main__":
-#     # User can specify 'info_source' as 'wikipedia' or leave it out for DuckDuckGo
-#     state = {"topic": "SDLC"}  # Try adding "info_source": "wikipedia" to use Wikipedia
-#     state = info_node(state)
-#     print(f"Summary from {state['info_source'].capitalize()}:")
-#     print(state["info_summary"])
-
-
-
-# if __name__ == "__main__":
-#     state = {}
-#     state = requirements_node(state)       # 1. Get requirements from LLM
-#     state = manual_story_node(state)       # 2. User enters a story (manual input)
-#     state = system_design_node(state)      # 3. Get system design from LLM
-
-#     print("\n--- Final System Design ---")
-#     print(state["system_design"])
+    #This Node will be Providing The Option if user Wants to choose b 1/2/3 so that the Node can Work Accordingly 
+    state = next_node_after_generation(state)
+    state = code_generation_node(state)
