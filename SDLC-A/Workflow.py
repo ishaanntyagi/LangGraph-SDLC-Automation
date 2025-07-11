@@ -161,7 +161,7 @@ def code_generation_node(state):
         print("Regenerating system design as per your request...")
         # Optionally allow the user to revise the design request
         state = system_design_node(state)
-        return code_generation_node(state)
+        return code_generation_node(state) #✅
     
     
     
@@ -171,18 +171,18 @@ def next_node_after_generation(state):
     print("1. Regenerate the code, if The Code is not Up to The mark")
     print("2. Get an explanation of the Generated code")
     print("3. Go to the next node in sequence, That is ")
-    user_choice = input("Enter the number of your choice (1/2/3): ").strip()
+    user_choice = input("Enter the number of your choice (one/two/three): ").strip()
      
-    if user_choice == 1:
+    if user_choice == "one":
         print("Taking back to the Code generation Node" "\n")
         state = code_generation_node(state)
          
-    elif user_choice == 2:
+    elif user_choice == "two":
         state = code_explainer_node(state)
         print("Explaining The code provided -->" "\n")
         print(state.get("code_explanation"))
         
-    elif user_choice == 3:
+    elif user_choice == "three":
         print("nothing Yet , tbc")
              
         
@@ -249,4 +249,3 @@ if __name__ == "__main__":
 
     #This Node will be Providing The Option if user Wants to choose b 1/2/3 so that the Node can Work Accordingly 
     state = next_node_after_generation(state)
-    state = code_generation_node(state)
