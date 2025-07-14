@@ -1,6 +1,7 @@
 import requests
 from langchain_community.tools import WikipediaQueryRun
 from langchain_community.utilities import WikipediaAPIWrapper
+import os
 
 from langchain_community.tools import WikipediaQueryRun
 from langchain_community.utilities import WikipediaAPIWrapper
@@ -290,7 +291,7 @@ def test_case_node(state):
     return state
 
 
-def requirements_node(state):
+def requirements_generation_node(state):
     generated_code = state.get("generated_code", "")
     if not generated_code:
         print("Code not found")
@@ -321,7 +322,7 @@ def requirements_node(state):
         if line:
             data = json.loads(line.decode('utf-8'))
             if "response" in data:
-                print(data["response"], end='', flush=True)    #THIS WILL FETCH THE INFORMATION AND ADD IT TO THE  
+                print(data["response"], end='', flush=True)    #THIS WILL FETCH THE INFORMATION AND ADD IT TO THE full_response
                 full_response += data["response"]
             if data.get("done", False):
                 break
@@ -334,4 +335,156 @@ def requirements_node(state):
 
     state["requirements_txt"] = full_response.strip()
     return state
+
+
+
+def documentation_node(state):
+    info_summary = state.get("info_summary", "")
+    system_design = state.get("system_design", "")      #These are the Variables That are Required to Generate The documentation/Readme can be made and downloaded as .md format.
+    requirements_txt = state.get("requirements_txt", "")
+    generated_code = state.get("generated_code", "")
+    
+    
+    #This will be The Prompt For The Ollama Api 
+    prompt = (
+        "You are an expert technical writer. Given the following project details, generate a clear, beginner-friendly README.md file.\n"
+        f"Project Info Summary:\n{info_summary}\n\n"
+        f"System Design:\n{system_design}\n\n"
+        f"Requirements.txt:\n{requirements_txt}\n\n"
+        "Code:\n"
+        f"{generated_code}\n\n"
+        "README should include:\n"
+        "- Project title and summary (from info summary)\n"
+        "- Setup instructions (including dependencies from requirements.txt)\n"
+        "- How to run the code\n"
+        "- Usage examples if possible\n"
+        "- Keep everything simple and clear for a beginner."
+    )
+    
+    
+    url = "http://localhost:11434/api/generate"
+    payload = {
+        "model":"gemma:2b",
+        "prompt":prompt
+    }
+    
+    response = requests.post(url, json=payload, stream=True)
+    
+    full_response = ""
+    for line in response.iter_lines():
+        if line:
+            data = json.loads(line.decode('utf-8'))
+            if "response" in data:
+                print(data["response"], end='', flush=True)
+                full_response += data["response"]
+            if data.get("done", False):
+                break
+    
+
+    print("Downloading the Readme.md in your Working Directory")
+    
+ 
+    with open("README.md", "w", encoding="utf-8") as f:
+        f.write(full_response.strip())
+    print("README.md saved.")
+
+    state["readme"] = full_response.strip()
+    return state 
+
+import networkx as nx
+import matplotlib.pyplot as plt
+
+
+steps = [
+    "info_node",
+    "requirements_node",
+    "manual_story_node",
+    "system_design_node",
+    "code_generation_node",
+    "next_node_after_generation",
+    "code_explainer_node",
+    "test_case_node",
+    "requirements_generation_node",
+    "documentation_node"
+]
+
+edges = [
+    ("info_node", "requirements_node"),
+    ("requirements_node", "manual_story_node"),
+    ("manual_story_node", "system_design_node"),
+    ("system_design_node", "code_generation_node"),
+    ("code_generation_node", "next_node_after_generation"),
+    ("next_node_after_generation", "code_generation_node"),      # Regenerate code (loop)
+    ("next_node_after_generation", "code_explainer_node"),       # Explanation                 #As these are the Repeative steps that Reqire Going Up and Down via edges
+    ("next_node_after_generation", "test_case_node"),            # Proceed to test cases
+    ("code_explainer_node", "test_case_node"),
+    ("test_case_node", "requirements_generation_node"),
+    ("requirements_generation_node", "documentation_node"),
+]
+
+# G = nx.DiGraph()
+# G.add_nodes_from(steps)
+# G.add_edges_from(edges)
+
+# plt.figure(figsize=(13, 8))
+# pos = nx.spring_layout(G, seed=42)
+# nx.draw(G, pos, with_labels=True, node_color='white', node_size=3000, arrowsize=30, font_size=12)
+# plt.title("Generative AI Workflow Graph")
+# plt.show()
+
+# def main():
+#     state = {}
+
+#     print("\n--- Step 1: Info Node ---")
+#     state = info_node(state)
+#     print("\n--- Info Summary ---")
+#     print(state.get("info_summary", "No summary found."))
+
+#     print("\n--- Step 2: Requirements Node ---")
+#     state = requirements_node(state)
+#     print("\n--- Requirements Prompt ---")
+#     print(state.get("requirements", "No requirements prompt generated."))
+
+#     print("\n--- Step 3: Manual Story Node ---")
+#     state = manual_story_node(state)
+#     print("\n--- Chosen Story ---")
+#     print(state.get("chosen_story", "No story chosen."))
+
+#     print("\n--- Step 4: System Design Node ---")
+#     state = system_design_node(state)
+#     print("\n--- System Design ---")
+#     print(state.get("system_design", "No system design generated."))
+
+#     print("\n--- Step 5: Code Generation Node ---")
+#     state = code_generation_node(state)
+#     print("\n--- Generated Code ---")
+#     print(state.get("generated_code", "No code generated."))
+
+#     print("\n--- Step 6: Next Node After Generation ---")
+#     state = next_node_after_generation(state)
+
+#     print("\n--- Step 7: Code Explainer Node ---")
+#     state = code_explainer_node(state)
+#     print("\n--- Code Explanation ---")
+#     print(state.get("code_explanation", "No explanation generated."))
+
+#     print("\n--- Step 8: Test Case Node ---")
+#     state = test_case_node(state)
+#     print("\n--- Test Cases ---")                                               #THIS IS FOR USING THE APP IN THE TERMINAL 
+#     print(state.get("test_cases", "No test cases generated."))
+
+#     print("\n--- Step 9: Requirements Generation Node ---")
+#     state = requirements_generation_node(state)
+#     print("\n--- Requirements.txt ---")
+#     print(state.get("requirements_txt", "No requirements generated."))
+
+#     print("\n--- Step 10: Documentation Node ---")
+#     state = documentation_node(state)
+#     print("\n--- README.md ---")
+#     print(state.get("readme", "No documentation generated."))
+
+#     print("\n--- Workflow Complete! ---")
+
+# if __name__ == "__main__":
+#     main()
 
