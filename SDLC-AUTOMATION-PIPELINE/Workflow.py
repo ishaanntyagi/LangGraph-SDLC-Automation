@@ -66,7 +66,7 @@ def requirements_node(state):
             if data.get("done", False):
                 break
     print()  # for a clean new line at the end
-    state["ollama_response"] = full_response #prininting the ollama Response (Whole )
+    state["ollama_response"] = full_response #prininting the ollama Response (Whole)
     return state
 
 
@@ -74,7 +74,6 @@ def manual_story_node(state): #Simple Human intervention node to Choose the stor
     story = input("Please enter your story: ")
     state["chosen_story"] = story
     return state
-
 
 import requests
 import json
@@ -131,9 +130,15 @@ def code_generation_node(state):
         "- Include all necessary import statements and initialization code.\n"
         "- If configuration or environment setup is needed, include it at the top as code comments.\n"
         "- Make sure the output does not stop mid-function or mid-class. Finish all code blocks.\n"
-        "- Do not generate test cases or documentation here.\n\n"
+        "- Do not generate test cases or documentation here, But CREATE THE CODE FULLY AND DONOT LEAVE ANY FUNCTIONS EMPTY\n\n"
         f"System Design:\n{state['system_design']}\n"
 )       #the prompt will Serve as a text that will be passed to the LLM Via tha api call and the prompt will be Generating the output as a code.
+        
+        
+        
+    # elif approval == "no":
+    #     print("-Regenerating the System Design-")
+    #     state = system_design_node(state)
         
         url = "http://localhost:11434/api/generate"
         payload = {
@@ -161,7 +166,7 @@ def code_generation_node(state):
         print("Regenerating system design as per your request...")
         # Optionally allow the user to revise the design request
         state = system_design_node(state)
-        return code_generation_node(state) #✅
+        return code_generation_node(state) 
     
     
     
@@ -196,7 +201,7 @@ def code_explainer_node(state):
         "You are a beginner-friendly coding tutor.\n"
         "Explain the following code step by step, in very simple language.\n"
         "Describe what each function does, how the code works, and the main ideas.\n"
-        "Do NOT repeat the code, just explain in plain English.\n\n"
+        "Do NOT repeat the code, just explain in plain English and The Code should be explained Line by line .\n\n"
         f"Code:\n{generated_code}\n"
     )
       
@@ -220,8 +225,24 @@ def code_explainer_node(state):
                     break
     print()
     state["code_explanation"] = full_response
-    return state 
+    
+    proper_code = input("was The Code Explanation Proper as per Your Requiremnt? (zero:imProper) , (one:✅)")
+    if proper_code =="zero":
+        print("Regenerating the Code Explanation Again,Provide the Approval Again")
+        state = next_node_after_generation(state)
+        
+    elif proper_code == "one":
+        print("Lets Get to the Next State , Where You Can Generate The Test Cases For Your Chosen Code:")
+        state = test_case_node(state)
+    return state
 
+
+
+def test_case_node(state):
+    print("Lets Generate The Test Cases For The Above Code, Provide Your Prompt Along With your Code:")
+    generated_code = state.get("generated_code","")
+    print(generated_code)
+    
     
     
 if __name__ == "__main__":
@@ -231,7 +252,6 @@ if __name__ == "__main__":
     if info_choice in ["wikipedia", "duckduckgo"]:
         state["info_source"] = info_choice
     state = info_node(state)
-    print(f"Summary from {state['info_source'].capitalize()}:")
     print(state["info_summary"])
 
     state = requirements_node(state)       
@@ -248,4 +268,4 @@ if __name__ == "__main__":
     print(state.get("generated_code", "No code generated."))
 
     #This Node will be Providing The Option if user Wants to choose b 1/2/3 so that the Node can Work Accordingly 
-    state = next_node_after_generation(state)--
+    state = next_node_after_generation(state)
