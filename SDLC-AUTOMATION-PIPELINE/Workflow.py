@@ -26,6 +26,10 @@ def info_node(state: dict):
     state["info_source"] = source # Source of the Summary is Stored here 
     return state #State Is the Dictionary 
 
+##############################################################################################################################################################
+
+
+
 import requests
 import json
 
@@ -70,6 +74,9 @@ def requirements_node(state):
     state["ollama_response"] = full_response #prininting the ollama Response (Whole)
     return state
 
+##############################################################################################################################################################
+
+
 
 def manual_story_node(state): #Simple Human intervention node to Choose the story , according to This Story The Tech Detail will be Genrated by the Model
     story = input("Please enter your story: ")
@@ -78,6 +85,9 @@ def manual_story_node(state): #Simple Human intervention node to Choose the stor
 
 import requests
 import json
+
+
+##############################################################################################################################################################
 
 def system_design_node(state):
     story = state["chosen_story"]
@@ -111,6 +121,8 @@ def system_design_node(state):
     print()  # for output formatting
     state["system_design"] = full_response
     return state
+
+##############################################################################################################################################################
 
 
 
@@ -170,7 +182,7 @@ def code_generation_node(state):
     state = next_node_after_generation(state)
     return state
     
-    
+################################################################################################################################################################   
     
 def next_node_after_generation(state):  #This node will be asking the user if the User wants to Regenerate The code or Go ahead with the Current Code
     generated_code = state.get("generated_code", "")
@@ -190,9 +202,12 @@ def next_node_after_generation(state):  #This node will be asking the user if th
         print(state.get("code_explanation"))
         
     elif user_choice == "three":
-        print("nothing Yet , tbc")
-             
-        
+        print("nothing Yet , tbc")      
+    return state
+
+##############################################################################################################################################################
+
+                
 def code_explainer_node(state):
     generated_code = state.get("generated_code", "")
     if not generated_code:
@@ -208,7 +223,7 @@ def code_explainer_node(state):
     )
       
       
-    url = "http://localhost:11434/api/generate"   # SAME AGAIN THE LOCAL HOST API CALL
+    url = "http://localhost:11434/api/generate"   # SAME AGAIN THE LOCAL HOST API CALL to Let Gemma Do the task
     payload = {
         "model": "gemma:2b",        # SMALL MODEL WITH 2 BILLION PARAMATERS USED BY ME
         "prompt": prompt
@@ -239,6 +254,8 @@ def code_explainer_node(state):
         state = test_case_node(state)
     return state
 
+
+##############################################################################################################################################################
 
 
 def test_case_node(state):
@@ -285,10 +302,13 @@ def test_case_node(state):
             
     print()
     state["test_cases"] = full_response
-    print("the Generated Test Cases are As Follows")
+    print("the Generated Test Cases are:")
     print(full_response)
-    print("Test cases Provided")
+    print("Test cases Done")
     return state
+
+##############################################################################################################################################################
+
 
 
 def requirements_generation_node(state):
@@ -297,7 +317,7 @@ def requirements_generation_node(state):
         print("Code not found")
 
         
-    print("analyzing Your Code to Generate The Requirements")
+    print("Gettin Your Code to Generate The Requirements to Execute The Code:")
     
     #The prompt Will be Provided to the ollama LLM
     prompt = (
@@ -316,7 +336,7 @@ def requirements_generation_node(state):
     }
         
     response = requests.post(url, json=payload, stream=True) #Similar to all the other Nodes till now , 
-    full_response = ""
+    full_response = "" #Will be added to this Variable Then
     
     for line in response.iter_lines():
         if line:
@@ -336,6 +356,7 @@ def requirements_generation_node(state):
     state["requirements_txt"] = full_response.strip()
     return state
 
+##############################################################################################################################################################
 
 
 def documentation_node(state):
@@ -343,6 +364,7 @@ def documentation_node(state):
     system_design = state.get("system_design", "")      #These are the Variables That are Required to Generate The documentation/Readme can be made and downloaded as .md format.
     requirements_txt = state.get("requirements_txt", "")
     generated_code = state.get("generated_code", "")
+    
     
     
     #This will be The Prompt For The Ollama Api 
@@ -381,7 +403,7 @@ def documentation_node(state):
                 break
     
 
-    print("Downloading the Readme.md in your Working Directory")
+    print("Downloading the Readme.md file in your Current Workflow Folder:")
     
  
     with open("README.md", "w", encoding="utf-8") as f:
@@ -389,7 +411,10 @@ def documentation_node(state):
     print("README.md saved.")
 
     state["readme"] = full_response.strip()
-    return state 
+    return state
+
+
+############################################################################################################################################################## 
 
 import networkx as nx
 import matplotlib.pyplot as plt
@@ -432,59 +457,59 @@ edges = [
 # plt.title("Generative AI Workflow Graph")
 # plt.show()
 
-# def main():
-#     state = {}
+def main():
+    state = {}
 
-#     print("\n--- Step 1: Info Node ---")
-#     state = info_node(state)
-#     print("\n--- Info Summary ---")
-#     print(state.get("info_summary", "No summary found."))
+    print("\n--- Info Node ---")
+    state = info_node(state)
+    print("\n--- Info Summary ---")
+    print(state.get("info_summary", "No summary found."))
 
-#     print("\n--- Step 2: Requirements Node ---")
-#     state = requirements_node(state)
-#     print("\n--- Requirements Prompt ---")
-#     print(state.get("requirements", "No requirements prompt generated."))
+    print("\n--- Requirements Node ---")
+    state = requirements_node(state)
+    # print("\n--- Requirements Prompt ---")
+    # print(state.get("requirements", "No requirements prompt generated."))
 
-#     print("\n--- Step 3: Manual Story Node ---")
-#     state = manual_story_node(state)
-#     print("\n--- Chosen Story ---")
-#     print(state.get("chosen_story", "No story chosen."))
+    print("\n--- Manual Story Node ---")
+    state = manual_story_node(state)
+    print("\n--- Chosen Story ---")
+    print(state.get("chosen_story", "No story chosen."))
 
-#     print("\n--- Step 4: System Design Node ---")
-#     state = system_design_node(state)
-#     print("\n--- System Design ---")
-#     print(state.get("system_design", "No system design generated."))
+    print("\n--- System Design Node ---")
+    state = system_design_node(state)
+    print("\n--- System Design ---")
+    print(state.get("system_design", "No system design generated."))
 
-#     print("\n--- Step 5: Code Generation Node ---")
-#     state = code_generation_node(state)
-#     print("\n--- Generated Code ---")
-#     print(state.get("generated_code", "No code generated."))
+    print("\n--- Code Generation Node ---")
+    state = code_generation_node(state)
+    print("\n--- Generated Code ---")
+    print(state.get("generated_code", "No code generated."))
 
-#     print("\n--- Step 6: Next Node After Generation ---")
-#     state = next_node_after_generation(state)
+    print("\n--- Next Node After Generation ---")
+    state = next_node_after_generation(state)
 
-#     print("\n--- Step 7: Code Explainer Node ---")
-#     state = code_explainer_node(state)
-#     print("\n--- Code Explanation ---")
-#     print(state.get("code_explanation", "No explanation generated."))
+    print("\n--- oneCode Explainer Node ---")
+    state = code_explainer_node(state)
+    print("\n--- Code Explanation ---")
+    print(state.get("code_explanation", "No explanation generated."))
 
-#     print("\n--- Step 8: Test Case Node ---")
-#     state = test_case_node(state)
-#     print("\n--- Test Cases ---")                                               #THIS IS FOR USING THE APP IN THE TERMINAL 
-#     print(state.get("test_cases", "No test cases generated."))
+    print("\n--- Test Case Node ---")
+    state = test_case_node(state)
+    print("\n--- Test Cases ---")                                                               #THIS IS FOR USING THE APP IN THE TERMINAL 
+    print(state.get("test_cases", "No test cases generated."))
 
-#     print("\n--- Step 9: Requirements Generation Node ---")
-#     state = requirements_generation_node(state)
-#     print("\n--- Requirements.txt ---")
-#     print(state.get("requirements_txt", "No requirements generated."))
+    print("\n--- Requirements Generation Node ---")
+    state = requirements_generation_node(state)
+    print("\n--- Requirements.txt ---")
+    print(state.get("requirements_txt", "No requirements generated."))
 
-#     print("\n--- Step 10: Documentation Node ---")
-#     state = documentation_node(state)
-#     print("\n--- README.md ---")
-#     print(state.get("readme", "No documentation generated."))
+    print("\n--- Documentation Node ---")
+    state = documentation_node(state)
+    print("\n--- README.md ---")
+    print(state.get("readme", "No documentation generated."))
 
-#     print("\n--- Workflow Complete! ---")
+    print("\n--- Workflow done! ---")
 
-# if __name__ == "__main__":
-#     main()
+if __name__ == "__main__":
+    main()
 
