@@ -52,7 +52,7 @@ def requirements_node(state):
 
     url = "http://localhost:11434/api/generate" #ollama Localhost Server url to send the LLM Request 
     payload = {
-        "model": "gemma:2b", #gemma is the Googles LLM group
+        "model": "gemma:2b", #gemma is the Google's LLM group of Models
         "prompt": requirements #Prompt to the LLM will be defined by requiremnts and topic will be asked by the user
     }
     response = requests.post(url, json=payload, stream=True) #sends a post request to ollama , payload=json means that data needs to be in json format

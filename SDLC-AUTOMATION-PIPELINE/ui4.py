@@ -1,3 +1,8 @@
+#All The use of Nodes Are Explained in the Workflow.py 
+# Workflow.py is the main File , Instead Of Importing the Nodes The Nodes are pasted again here to manage The Calls 
+# 
+
+
 import requests
 import json
 from langchain_community.tools import WikipediaQueryRun
@@ -6,89 +11,129 @@ import os
 
 try:
     import streamlit as st
-    if "state" not in st.session_state:
-        st.session_state.state = {}
 
-    st.set_page_config(page_title="Agentic AI based SDLC automation", layout="wide")
-    st.markdown("""
-        <style>
-            body, .main, .stApp {
-                background-color: #16171b !important;
-                color: #f7f7f7 !important;
-                font-size: 1.19rem !important;
-            }
-            .stTabs [data-baseweb="tab-list"] {gap: 2rem;}
-            .stTabs [data-baseweb="tab"] {
-                font-size: 1.18rem; font-weight: 700; color: #fff !important; letter-spacing:0.01em;
-            }
-            .stTabs [aria-selected="true"] {
-                color: #ff4747 !important;
-                border-bottom: 3px solid #ff4747 !important;
-                background: none;
-            }
-            .section-header {
-                font-size:2.3rem;
-                margin-top:2rem; margin-bottom:1.3rem; font-weight:800;
-                letter-spacing:0.01em;
-                color:#fff;
-            }
-            .ai-output, .markdown-preview {
-                background: #16171b;
-                border-radius: 12px;
-                padding: 2.1em 2.1em 2.1em 2.1em;
-                margin-top: 18px;
-                margin-bottom: 28px;
-                font-size: 1.17rem;
-                font-family: 'Inter', 'Segoe UI', 'sans-serif';
-                color: #f8f8f2;
-                box-shadow: 0 2px 24px 0 #15161b45;
-                line-height: 1.7;
-            }
-            .best-code-preview {
-                background: #101014 !important;
-                border-radius: 14px;
-                padding: 2em 2em 2em 2em;
-                margin-top: 30px;
-                margin-bottom: 36px;
-                font-size: 1.175rem !important;
-                font-family: 'Fira Mono', 'JetBrains Mono', 'Menlo', 'Consolas', 'monospace' !important;
-                overflow-x: auto;
-                color: #f7f7f7 !important;
-                border: 2px solid #232324;
-                line-height: 1.68;
-                white-space: pre;
-            }
-            .stTextInput>div>div>input, .stTextArea textarea, .stSelectbox div[role="combobox"] {
-                background-color: #232324 !important; color: #fff !important;
-                border: 1.4px solid #34363a !important; border-radius: 7px !important;
-                font-size: 1.18rem !important;
-            }
-            .stButton>button, .stDownloadButton>button {
-                font-size:1.22rem; padding:0.6em 2.3em;
-                background:#232324; color:#fff; border-radius:8px;
-                border: 2px solid #34363a;
-                font-weight: 800;
-                transition: background 0.2s;
-            }
-            .stButton>button:hover, .stDownloadButton>button:hover {background-color:#ff4747; color:#fff;}
-            hr {border-top: 1.5px solid #34363a;}
-        </style>
-    """, unsafe_allow_html=True)
-    st.markdown(
-        '<h1 style="color:#fff; font-size:2.4rem; font-weight:800; text-align:center; margin-bottom:1.5rem;">Agentic AI based SDLC automation</h1>',
-        unsafe_allow_html=True
-    )
-    tabs = [
+    PROJECT_NAME = "Agentic AI based SDLC Automation"
+    TABS = [
         "Info", "Requirements", "User Story", "System Design",
         "Code Generation", "Next Step", "Code Explanation", "Test Cases",
         "Requirements.txt", "README"
     ]
-    tab_objs = st.tabs(tabs)
+
+    st.set_page_config(page_title=PROJECT_NAME, layout="wide")
+
+  # The top Most Project Name - Agentic Ai Based SDLC Automation
+    st.markdown(
+        f'<div style="color:#fff; font-size:2.1rem; font-weight:800; text-align:center; margin-bottom:0.7rem; margin-top:1.2rem;">{PROJECT_NAME}</div>',
+        unsafe_allow_html=True
+    )
+
+    st.markdown(f"""
+        <style>
+        body, .main, .stApp {{
+            background-color: #16171b !important;
+            color: #f7f7f7 !important;
+            font-size: 1.17rem !important;
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+        }}
+        .stTabs [data-baseweb="tab-list"] {{gap: 2rem;}}
+        .stTabs [data-baseweb="tab"] {{
+            font-size: 1.18rem; font-weight: 700; color: #fff !important;
+        }}
+        .stTabs [aria-selected="true"] {{
+            color: #ff4747 !important;
+            border-bottom: 3px solid #ff4747 !important;
+        }}
+        .section-header {{
+            font-size:2.3rem; margin-top:2rem; margin-bottom:1.3rem; font-weight:800;
+            letter-spacing:0.01em; color:#fff;
+        }}
+        .ai-output, .markdown-preview {{
+            background: #17181d;
+            border-radius: 12px;
+            padding: 2.1em 2.1em 2.1em 2.1em;
+            margin-top: 18px;
+            margin-bottom: 28px;
+            font-size: 1.15rem;
+            color: #f8f8f2;
+            box-shadow: 0 2px 24px 0 #15161b45;
+            line-height: 1.7;
+        }}
+        .best-code-preview {{
+            background: #14171b !important;
+            border-radius: 14px;
+            padding: 2em 2em 2em 2em;
+            margin-top: 30px;
+            margin-bottom: 36px;
+            font-size: 1.13rem !important;
+            font-family: 'JetBrains Mono', 'Fira Mono', 'Menlo', 'Consolas', 'monospace' !important;
+            
+            overflow-x: auto;
+            color: #f7f7f7 !important;
+            border: 2px solid #232324;
+            line-height: 1.67;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }}
+        .stTextInput>div>div>input, .stTextArea textarea, .stSelectbox div[role="combobox"] {{
+            background-color: #232324 !important; color: #fff !important;
+            border: 1.4px solid #34363a !important; border-radius: 7px !important;
+            font-size: 1.18rem !important;
+        }}
+        .stButton>button, .stDownloadButton>button {{
+            font-size:1.13rem; padding:0.5em 1.8em; margin: 0.2em 0.5em 0.2em 0;
+            background:#232324; color:#fff; border-radius:7px;
+            border: 2px solid #34363a;
+            font-weight: 700;
+            transition: background 0.2s;
+        }}
+        .stButton>button:active, .stDownloadButton>button:active {{
+            background-color:#ff4747 !important; color:#fff !important;
+        }}
+        .stButton>button:hover, .stDownloadButton>button:hover {{
+            background-color:#ff4747; color:#fff;
+        }}
+        .tab-progress-box {{
+            margin-top: .7em; margin-bottom: .9em; padding: 0.45em 1.0em;
+            border-radius: 8px;
+            background: #1a9c3a;
+            display: flex;
+            align-items: center;
+            font-size: 1.04rem;
+            color: #fff;
+            border: 1.5px solid #1a9c3a;
+            font-weight: 700;
+            box-shadow: 0 1px 7px 0 #1a9c3a20;
+            max-width: 340px;
+        }}
+        .tab-progress-light {{
+            display: inline-block;
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            margin-right: 10px;
+            background: #29e74a;
+            box-shadow: 0 0 5px 0 #41ec41;
+            border: 1.5px solid #b6f7b7;
+        }}
+        hr {{border-top: 1.5px solid #34363a;}}
+        </style>
+    """, unsafe_allow_html=True)
+
+    if "state" not in st.session_state:
+        st.session_state["state"] = {}
+
+    def tab_progress(tab_name):
+        return f"""<div class="tab-progress-box">
+        <span class="tab-progress-light"></span>
+        <span>Active step: <b>{tab_name}</b></span>
+        </div>"""
+
+    tab_objs = st.tabs(TABS)
+
 except ImportError:
     st = None
     tab_objs = [None]*10
 
-############################## NODES ##############################
+# Nodes are Pasted Again , intead of import Workflow() from another File , in workflow you can use it in Terminal With the main() function mentioned at the end 
 
 def info_node(state: dict):
     if st and st.session_state.get("use_streamlit_info_node", False):
@@ -126,10 +171,7 @@ def requirements_node(state):
     )
     state["requirements"] = requirements
     url = "http://localhost:11434/api/generate"
-    payload = {
-        "model": "gemma:2b",
-        "prompt": requirements
-    }
+    payload = {"model": "gemma:2b", "prompt": requirements}
     response = requests.post(url, json=payload, stream=True)
     full_response = ""
     for line in response.iter_lines():
@@ -145,7 +187,7 @@ def requirements_node(state):
 def manual_story_node(state):
     if st and st.session_state.get("use_streamlit_manual_story_node", False):
         story = st.session_state.get("manual_story_input", "")
-    else:
+    else:                                                                                       # All Nodes Explained In WorkFlow.py
         story = input("Please enter your story: ")
     state["chosen_story"] = story
     return state
@@ -155,18 +197,15 @@ def system_design_node(state):
     if st and st.session_state.get("use_streamlit_system_design_node", False):
         user_prompt = st.session_state.get("system_design_input", "")
     else:
-        user_prompt = input("Enter your system design request (e.g., focus on scalability, security, etc.): ")
+        user_prompt = input("Enter your system design request (e.g., focus on scalability, security, etc.): ")   
     final_prompt = (
         f"Given the following story, design a software system based on this additional request.\n\n"
         f"Story:\n{story}\n\n"
         f"User Request:\n{user_prompt}\n\n"
         f"Please provide details on system components, data flow, and user interactions, How this can be made, how much time will it take to test the code and stuff. Be Clear and Precise "
     )
-    url = "http://localhost:11434/api/generate"
-    payload = {
-        "model": "gemma:2b",
-        "prompt": final_prompt
-    }
+    url = "http://localhost:11434/api/generate"            #The Ollama Api Local Server Link , All Explained in the Workflow.py
+    payload = {"model": "gemma:2b", "prompt": final_prompt}
     response = requests.post(url, json=payload, stream=True)
     full_response = ""
     for line in response.iter_lines():
@@ -200,10 +239,7 @@ def code_generation_node(state):
             f"System Design:\n{state['system_design']}\n"
         )
         url = "http://localhost:11434/api/generate"
-        payload = {
-            "model": "gemma:2b",
-            "prompt": prompt
-        }
+        payload = {"model": "gemma:2b", "prompt": prompt}
         response = requests.post(url, json=payload, stream=True)
         full_response = ""
         for line in response.iter_lines():
@@ -221,9 +257,11 @@ def code_generation_node(state):
     return state
 
 def next_node_after_generation(state):
-    # No infinite loop, just record choice in session_state
+    # FIX: Don't strip or set session_state with the same key as the widget!
     if st and st.session_state.get("use_streamlit_next_node_after_generation", False):
-        user_choice = st.session_state.get("next_node_after_generation_choice", "").strip()
+        user_choice = st.session_state.get("next_node_after_generation_choice", "")
+        if isinstance(user_choice, str):
+            user_choice = user_choice.strip()
     else:
         user_choice = input("Enter the number of your choice (one/two/three): ").strip()
     next_node = None
@@ -248,10 +286,7 @@ def code_explainer_node(state):
         f"Code:\n{generated_code}\n"
     )
     url = "http://localhost:11434/api/generate"
-    payload = {
-        "model": "gemma:2b",
-        "prompt": prompt
-    }
+    payload = {"model": "gemma:2b", "prompt": prompt}
     response = requests.post(url, json=payload, stream=True)
     full_response = ""
     for line in response.iter_lines():
@@ -283,10 +318,7 @@ def test_case_node(state):
     prompt += f"There Are some Additional User Requirements : {user_prompt}" 
     prompt += f"Code To test = {generated_code}" "\n"
     url = "http://localhost:11434/api/generate"
-    payload = {
-        "model": "gemma:2b",
-        "prompt": prompt
-    }
+    payload = {"model": "gemma:2b", "prompt": prompt}
     response = requests.post(url,json=payload,stream=True)
     full_response = ""
     for line in response.iter_lines():
@@ -311,10 +343,7 @@ def requirements_generation_node(state):
         f"{generated_code}\n"
     )
     url = "http://localhost:11434/api/generate"
-    payload = {
-        "model": "gemma:2b",
-        "prompt": prompt
-    }
+    payload = {"model": "gemma:2b", "prompt": prompt}
     response = requests.post(url, json=payload, stream=True)
     full_response = ""
     for line in response.iter_lines():
@@ -349,10 +378,7 @@ def documentation_node(state):
         "- Keep everything simple and clear for a beginner."
     )
     url = "http://localhost:11434/api/generate"
-    payload = {
-        "model":"gemma:2b",
-        "prompt":prompt
-    }
+    payload = {"model":"gemma:2b", "prompt":prompt}
     response = requests.post(url, json=payload, stream=True)
     full_response = ""
     for line in response.iter_lines():
@@ -367,109 +393,125 @@ def documentation_node(state):
     state["readme"] = full_response.strip()
     return state
 
-################### UI Tabs ###################
+# All the nodes same as , WorkFlow
+
+#Now The Tabs Are stated
 
 if st:
+    for idx, tab in enumerate(tab_objs):
+        with tab:
+            st.markdown(tab_progress(TABS[idx]), unsafe_allow_html=True)
+    #The Information Tab
     with tab_objs[0]:
         st.session_state["use_streamlit_info_node"] = True
         st.markdown('<div class="section-header">Project Info</div>', unsafe_allow_html=True)
         topic_input = st.text_input("Enter the topic you want to search information about:", key="topic_input")
         info_source = st.selectbox("Choose information source:", ["duckduckgo", "wikipedia"])
-        st.session_state.state["info_source"] = info_source
-        if st.button("Fetch Info"):
-            st.session_state.state = info_node(st.session_state.state)
-        if st.session_state.state.get("info_summary"):
-            st.markdown(f'<div class="ai-output">{st.session_state.state["info_summary"]}</div>', unsafe_allow_html=True)
+        st.session_state["state"]["info_source"] = info_source
+        if st.button("Fetch Info", key="fetch_info_btn"):
+            st.session_state["state"] = info_node(st.session_state["state"])
+        if st.session_state["state"].get("info_summary"):
+            st.markdown(f'<div class="ai-output">{st.session_state["state"]["info_summary"]}</div>', unsafe_allow_html=True)
 
+    # Here The Approaches According to tthe users need Will be Generated
     with tab_objs[1]:
         st.session_state["use_streamlit_requirements_node"] = True
         st.markdown('<div class="section-header">Requirements</div>', unsafe_allow_html=True)
-        requirements_topic_input = st.text_input("Enter the project topic for requirements_node:", key="requirements_topic_input")
-        if st.button("Submit Requirements"):
-            st.session_state.state = requirements_node(st.session_state.state)
-        if st.session_state.state.get("ollama_response"):
-            st.markdown(f'<div class="ai-output">{st.session_state.state["ollama_response"]}</div>', unsafe_allow_html=True)
+        requirements_topic_input = st.text_input("Enter the project topic for requirements_node, It will be providing you the Approaches ", key="requirements_topic_input")
+        if st.button("Submit Requirements", key="submit_reqs_btn"):
+            st.session_state["state"] = requirements_node(st.session_state["state"])
+        if st.session_state["state"].get("ollama_response"):
+            st.markdown(f'<div class="ai-output">{st.session_state["state"]["ollama_response"]}</div>', unsafe_allow_html=True)
 
+    # Provide one of the Best Approaches That was generated in the Requiremnts TAB So that SysTem Design Can be Generated Accordingly.
     with tab_objs[2]:
         st.session_state["use_streamlit_manual_story_node"] = True
         st.markdown('<div class="section-header">User Story</div>', unsafe_allow_html=True)
-        manual_story_input = st.text_area("Please enter your story:", key="manual_story_input")
-        if st.button("Submit Story"):
-            st.session_state.state = manual_story_node(st.session_state.state)
-        if st.session_state.state.get("chosen_story"):
-            st.markdown(f'<div class="ai-output">{st.session_state.state["chosen_story"]}</div>', unsafe_allow_html=True)
+        manual_story_input = st.text_area("Please enter Your Selected Approach:", key="manual_story_input")
+        if st.button("Submit Story", key="submit_story_btn"):
+            st.session_state["state"] = manual_story_node(st.session_state["state"])
+        if st.session_state["state"].get("chosen_story"):
+            st.markdown(f'<div class="ai-output">{st.session_state["state"]["chosen_story"]}</div>', unsafe_allow_html=True)
 
+    # Here The System Design Will be Created and then the Prompt will be Working on the BackEnd Via LLama..
     with tab_objs[3]:
         st.session_state["use_streamlit_system_design_node"] = True
         st.markdown('<div class="section-header">System Design</div>', unsafe_allow_html=True)
         system_design_input = st.text_input("Enter your system design request (e.g., focus on scalability, security, etc.):", key="system_design_input")
-        if st.button("Generate Design"):
-            st.session_state.state = system_design_node(st.session_state.state)
-        if st.session_state.state.get("system_design"):
-            st.markdown(f'<div class="ai-output">{st.session_state.state["system_design"]}</div>', unsafe_allow_html=True)
+        if st.button("Generate Design", key="generate_design_btn"):
+            st.session_state["state"] = system_design_node(st.session_state["state"])
+        if st.session_state["state"].get("system_design"):
+            st.markdown(f'<div class="ai-output">{st.session_state["state"]["system_design"]}</div>', unsafe_allow_html=True)
 
+        #Generate The Code According to the Requirments and System Design That User Has Selected
     with tab_objs[4]:
         st.session_state["use_streamlit_code_generation_node"] = True
         st.markdown('<div class="section-header">Code Generation</div>', unsafe_allow_html=True)
         code_generation_approval = st.radio("Do You want to go ahead with the current System Design?", ["yes", "no"])
         st.session_state["code_generation_approval"] = code_generation_approval
-        if st.button("Generate Code"):
-            st.session_state.state = code_generation_node(st.session_state.state)
-        if st.session_state.state.get("generated_code"):
-            st.markdown(
-                f'<pre class="best-code-preview">{st.session_state.state["generated_code"]}</pre>',
-                unsafe_allow_html=True
-            )
+        if st.button("Generate Code", key="generate_code_btn"):
+            st.session_state["state"] = code_generation_node(st.session_state["state"])
+        code = st.session_state["state"].get("generated_code")
+        if code:
+            st.code(code, language="python")
 
+    # 
     with tab_objs[5]:
         st.session_state["use_streamlit_next_node_after_generation"] = True
         st.markdown('<div class="section-header">Next Step</div>', unsafe_allow_html=True)
         st.markdown(
-            '<div style="font-size:1.15rem; margin-bottom:1.1em;">What would you like to do next? Choose an action to proceed:</div>',
+            '<div style="font-size:1.12rem; margin-bottom:1.0em;">What would you like to do next? Choose an action to proceed:</div>',
             unsafe_allow_html=True
         )
         next_options = ["Regenerate the code", "Get an explanation of the generated code", "Go to test cases"]
         next_node_after_generation_choice = st.radio("Next action", next_options, key="next_node_after_generation_choice")
-        if st.button("Continue to Next Step"):
-            # Set the choice in session state
-            st.session_state["next_node_after_generation_choice"] = next_node_after_generation_choice
-            st.session_state.state = next_node_after_generation(st.session_state.state)
-            st.experimental_rerun()
+        if st.button("Continue to Next Step", key="continue_nextstep_btn"):
+            # FIX: Don't set session_state with the same key as a widget!
+            st.session_state["state"] = next_node_after_generation(st.session_state["state"])
+            st.rerun()
 
+    # -------- Code Explanation Tab -----------
     with tab_objs[6]:
         st.session_state["use_streamlit_code_explainer_node"] = True
         st.markdown('<div class="section-header">Code Explanation</div>', unsafe_allow_html=True)
-        if st.button("Explain Code"):
-            st.session_state.state = code_explainer_node(st.session_state.state)
-        if st.session_state.state.get("code_explanation"):
-            st.markdown(f'<div class="ai-output">{st.session_state.state["code_explanation"]}</div>', unsafe_allow_html=True)
+        if st.button("Explain Code", key="explain_code_btn"):
+            st.session_state["state"] = code_explainer_node(st.session_state["state"])
+        code_exp = st.session_state["state"].get("code_explanation")
+        if code_exp:
+            st.markdown(f'<div class="ai-output">{code_exp}</div>', unsafe_allow_html=True)
 
+    # -------- Test Cases Tab -----------
     with tab_objs[7]:
         st.session_state["use_streamlit_test_case_node"] = True
         st.markdown('<div class="section-header">Test Cases</div>', unsafe_allow_html=True)
         test_case_input = st.text_input("Any specific Requirements? : \n if Not Press Enter", key="test_case_input")
-        if st.button("Generate Test Cases"):
-            st.session_state.state = test_case_node(st.session_state.state)
-        if st.session_state.state.get("test_cases"):
-            st.markdown(f'<div class="ai-output">{st.session_state.state["test_cases"]}</div>', unsafe_allow_html=True)
+        if st.button("Generate Test Cases", key="generate_testcases_btn"):
+            st.session_state["state"] = test_case_node(st.session_state["state"])
+        tests = st.session_state["state"].get("test_cases")
+        if tests:
+            st.markdown(f'<div class="ai-output">{tests}</div>', unsafe_allow_html=True)
 
+    # -------- Requirements.txt Tab -----------
     with tab_objs[8]:
         st.markdown('<div class="section-header">Requirements.txt</div>', unsafe_allow_html=True)
-        if st.button("Generate requirements.txt"):
-            st.session_state.state = requirements_generation_node(st.session_state.state)
-        if st.session_state.state.get("requirements_txt"):
-            st.code(st.session_state.state["requirements_txt"], language="text")
-            st.download_button("Download requirements.txt", st.session_state.state["requirements_txt"], "requirements.txt")
+        if st.button("Generate requirements.txt", key="generate_reqs_btn"):
+            st.session_state["state"] = requirements_generation_node(st.session_state["state"])
+        reqs = st.session_state["state"].get("requirements_txt")
+        if reqs:
+            st.code(reqs, language="text")
+            st.download_button("Download requirements.txt", reqs, "requirements.txt")
 
+    # -------- README Tab -----------
     with tab_objs[9]:
         st.markdown('<div class="section-header">README.md</div>', unsafe_allow_html=True)
-        if st.button("Generate README.md"):
-            st.session_state.state = documentation_node(st.session_state.state)
-        if st.session_state.state.get("readme"):
-            st.markdown(f'<div class="markdown-preview">{st.session_state.state["readme"]}</div>', unsafe_allow_html=True)
-            st.download_button("Download README.md", st.session_state.state["readme"], "README.md")
+        if st.button("Generate README.md", key="generate_readme_btn"):
+            st.session_state["state"] = documentation_node(st.session_state["state"])
+        readme = st.session_state["state"].get("readme")
+        if readme:
+            st.markdown(f'<div class="markdown-preview">{readme}</div>', unsafe_allow_html=True)
+            st.download_button("Download README.md", readme, "README.md")
 
-    st.markdown("""
+    st.markdown(f"""
         <hr>
-        <center><small>Designed by IshaanNarayanTyagi | Agentic-AI and Generative-AI</small></center>
+        <center><small>Designed by IshaanNarayanTyagi | {PROJECT_NAME}</small></center>
     """, unsafe_allow_html=True)
