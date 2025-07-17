@@ -133,6 +133,9 @@ try:
         st.session_state["is_running"] = False
     if "code_generation_ready" not in st.session_state:
         st.session_state["code_generation_ready"] = False
+    # For regenerate logic after code generation "no"
+    if "code_regenerate_needed" not in st.session_state:
+        st.session_state["code_regenerate_needed"] = False
 
     def tab_progress(tab_name):
         color = "#ec4141" if st.session_state.get("is_running", False) else "#1a9c3a"
@@ -278,7 +281,7 @@ def code_generation_node(state):
             "- Include all necessary import statements and initialization code.\n"
             "- If configuration or environment setup is needed, include it at the top as code comments.\n"
             "- Make sure the output does not stop mid-function or mid-class. Finish all code blocks.\n"
-            "- Do not generate test cases or documentation here, But CREATE THE CODE FULLY AND DONOT LEAVE ANY FUNCTIONS EMPTY, I WANT THE CODE TO BE AS BIG AS POSSIBLE.\n\n"
+            "- Do not generate test cases or documentation here, But CREATE THE CODE FULLY AND DONOT LEAVE ANY FUNCTIONS EMPTY, I WANT THE CODE TO BE AS BIG AS POSSIBLE Also Keep The Following System Design in Memory.\n\n"
             f"System Design:\n{state['system_design']}\n"
         )
         url = "http://localhost:11434/api/generate"
@@ -293,9 +296,14 @@ def code_generation_node(state):
                 if data.get("done", False):
                     break
         state["generated_code"] = full_response
+        # Reset the regenerate flag
+        if st:
+            st.session_state["code_regenerate_needed"] = False
         return state
     elif approval == "no":
-        state = system_design_node(state)
+        if st:
+            st.session_state["code_regenerate_needed"] = True
+        # Do not call system_design_node(state) directly here; let UI handle it.
         return state
     return state
 
@@ -550,6 +558,13 @@ if st:
         if st.button("Generate Design", key="generate_design_btn"):
             with st.spinner("Generating system design..."):
                 st.session_state["state"] = system_design_node(st.session_state["state"])
+                st.session_state["code_regenerate_needed"] = False
+        # Only show "Regenerate" button if previous code generation was cancelled ("no")
+        if st.session_state.get("code_regenerate_needed", False):
+            if st.button("Regenerate", key="regenerate_design_btn"):
+                with st.spinner("Regenerating system design..."):
+                    st.session_state["state"] = system_design_node(st.session_state["state"])
+                    st.session_state["code_regenerate_needed"] = False
         if st.session_state["state"].get("system_design"):
             st.markdown(f'<div class="ai-output">{st.session_state["state"]["system_design"]}</div>', unsafe_allow_html=True)
             
@@ -566,6 +581,9 @@ if st:
         code = st.session_state["state"].get("generated_code")
         if code:
             st.code(code, language="python")
+            # Display full code in a large, scrollable text area for big outputs
+            st.text_area("Full Generated Code (for copy/paste)", value=code, height=800)
+            st.download_button("Download generated_code.py", code, "generated_code.py")
             
             
 

@@ -14,7 +14,10 @@ This project automates the early phases of the Software Development Life Cycle (
 4. **System Design Generation using LLM**
 5. **Code Generation from Approved System Design**
 6. **Optional: Code Explanation in Beginner-Friendly Language**
-7. **Modular Nodes for Workflow Extension**
+7. **Test Case Generation**
+8. **Requirements.txt Generation**
+9. **README.md Generation**
+10. **Modular Nodes for Workflow Extension**
 
 ---
 
@@ -52,11 +55,24 @@ Each step in the workflow is executed via a function-based node that modifies an
 - Offers user options:
   - Regenerate code
   - Explain the code
-  - Continue (TBD)
+  - Go to test cases
 
 ### 📖 7. `code_explainer_node()`
 - Explains the generated code in **very simple English**.
 - Designed for beginners and educational use.
+
+### 🧪 8. `test_case_node()`
+- Generates test cases for the produced code.
+- Focuses on unit tests and edge case coverage.
+- User can provide specific requirements for test coverage.
+
+### 📦 9. `requirements_generation_node()`
+- Analyzes the generated code and outputs a `requirements.txt` with all needed pip packages.
+- Ignores standard library modules.
+
+### 📝 10. `documentation_node()`
+- Produces a beginner-friendly `README.md` file.
+- Includes project summary, setup steps, how to run, and usage notes.
 
 ---
 
@@ -70,3 +86,30 @@ Install required Python packages:
 
 ```bash
 pip install langchain langchain-community requests
+```
+
+---
+
+## 🚀 Getting Started
+
+1. **Clone the repo**
+
+   ```bash
+   git clone https://github.com/yourusername/LangGraph-SDLC-Automation.git
+   cd LangGraph-SDLC-Automation
+   ```
+
+2. **Install Python dependencies**
+
+   ```bash
+   pip install langchain langchain-community requests
+   ```
+
+3. **Start Ollama (for local LLM inference)**
+
+   - Download and install [Ollama](https://ollama.com/) for your OS.
+   - Start Ollama server (should run at `http://localhost:11434` by default).
+   - Pull the Gemma 2b model if needed:
+     ```bash
+     ollama pull gemma:2b
+     ```
