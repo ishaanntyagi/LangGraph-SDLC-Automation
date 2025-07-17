@@ -1,5 +1,18 @@
 # LangGraph‑SDLC‑Automation 🚀
 
+## 🖼️ Project Snapshots
+
+<table>
+  <tr>
+    <td><img src="Screenshot 2025-07-14 162738.png" width="350"/></td>
+    <td><img src="Screenshot 2025-07-14 163047.png" width="350"/></td>
+  </tr>
+  <tr>
+    <td><img src="Screenshot 2025-07-14 163057.png" width="350"/></td>
+    <td><img src="Screenshot 2025-07-16 164837.png" width="350"/></td>
+  </tr>
+</table>
+
 An intelligent SDLC automation assistant built with `LangGraph` and LLM agents, designed to streamline software development processes — from idea to code. This tool walks the user through requirement gathering, technical system design, and code generation using LLMs and interactive nodes.
 
 ---
@@ -86,30 +99,3 @@ Install required Python packages:
 
 ```bash
 pip install langchain langchain-community requests
-```
-
----
-
-## 🚀 Getting Started
-
-1. **Clone the repo**
-
-   ```bash
-   git clone https://github.com/yourusername/LangGraph-SDLC-Automation.git
-   cd LangGraph-SDLC-Automation
-   ```
-
-2. **Install Python dependencies**
-
-   ```bash
-   pip install langchain langchain-community requests
-   ```
-
-3. **Start Ollama (for local LLM inference)**
-
-   - Download and install [Ollama](https://ollama.com/) for your OS.
-   - Start Ollama server (should run at `http://localhost:11434` by default).
-   - Pull the Gemma 2b model if needed:
-     ```bash
-     ollama pull gemma:2b
-     ```
