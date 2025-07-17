@@ -225,7 +225,7 @@ def code_explainer_node(state):
       
     url = "http://localhost:11434/api/generate"   # SAME AGAIN THE LOCAL HOST API CALL to Let Gemma Do the task
     payload = {
-        "model": "gemma:2b",        # SMALL MODEL WITH 2 BILLION PARAMATERS USED BY ME
+        "model": "gemma:2b",        # SMALL MODEL WITH 2 BILLION PARAMATERS
         "prompt": prompt
     }
     

@@ -19,22 +19,24 @@ try:
         "Requirements.txt", "README"
     ]
 
-    st.set_page_config(page_title=PROJECT_NAME, layout="wide")
+    st.set_page_config(page_title=PROJECT_NAME, layout="wide") #Sets the Screen Wide.
 
   # The top Most Project Name - Agentic Ai Based SDLC Automation
     st.markdown(
         f'<div style="color:#fff; font-size:2.1rem; font-weight:800; text-align:center; margin-bottom:0.7rem; margin-top:1.2rem;">{PROJECT_NAME}</div>',
         unsafe_allow_html=True
-    )
+    ) #Custom Styling of Fonts , Font Boldness , and Allignment
 
+
+#Here all the Fonts and Stuff Are Present 
     st.markdown(f"""
         <style>
         body, .main, .stApp {{
             background-color: #16171b !important;
-            color: #f7f7f7 !important;
+            color: #f7f7f7 !important;                  
             font-size: 1.17rem !important;
             font-family: 'Inter', 'Segoe UI', sans-serif;
-        }}
+        }} 
         .stTabs [data-baseweb="tab-list"] {{gap: 2rem;}}
         .stTabs [data-baseweb="tab"] {{
             font-size: 1.18rem; font-weight: 700; color: #fff !important;
@@ -117,42 +119,61 @@ try:
         hr {{border-top: 1.5px solid #34363a;}}
         </style>
     """, unsafe_allow_html=True)
+   # here The background color was set to black , Hover effects tored on buttons , Output Boxes , Progress Bar Fonts and Extra CSS for Modern Dark look with Fonts matching with the Dark Look 
+    
+    
+    
 
     if "state" not in st.session_state:
-        st.session_state["state"] = {}
+        st.session_state["state"] = {} #Similar to the state in our WorkFlow , st.session_state is the way of Keeping that in memory 
+#This Line checks if the State is already There 
+
+
 
     def tab_progress(tab_name):
         return f"""<div class="tab-progress-box">
-        <span class="tab-progress-light"></span>
+        <span class="tab-progress-light"></span>                 
         <span>Active step: <b>{tab_name}</b></span>
         </div>"""
 
-    tab_objs = st.tabs(TABS)
+# This is for The Green tab That states the Current Active Tab User is Currently Working on
+# With a green Light.
+    tab_objs = st.tabs(TABS) #tab init.
 
 except ImportError:
     st = None
-    tab_objs = [None]*10
+    tab_objs = [None]*10   # If The St is missing then 
+    
+#------------------------------------------------------------------- 
 
-# Nodes are Pasted Again , intead of import Workflow() from another File , in workflow you can use it in Terminal With the main() function mentioned at the end 
+
+# Nodes are Pasted Again , intead of  *from Workflow import()*  from another File , in workflow you can use it in Terminal With the main() function mentioned at the end 
 
 def info_node(state: dict):
-    if st and st.session_state.get("use_streamlit_info_node", False):
-        topic = st.session_state.get("topic_input", "").strip()
+    if st and st.session_state.get("use_streamlit_info_node", False): #if the node is active ,
+        topic = st.session_state.get("topic_input", "").strip() #Then Ask User Its Project Input *name of the project
     else:
-        topic = input("Enter the topic you want to search information about: ").strip()
-    state["topic"] = topic
+        topic = input("Enter the topic you want to search information about: ").strip() 
+    state["topic"] = topic #topic is stored To use Later in the Prompts , for the LLM
+    
     source = state.get("info_source", "duckduckgo")
+    
     if source == "wikipedia":
         wikipedia = WikipediaQueryRun(api_wrapper=WikipediaAPIWrapper())
-        summary = wikipedia.run(topic)
+        summary = wikipedia.run(topic)  #Choose Btween Wikipidia or DuckDuckGoApi to Fetch Information Regarding Anything
     else:
         url = f"https://api.duckduckgo.com/?q={topic}&format=json"
         response = requests.get(url)
         data = response.json()
         summary = data.get("AbstractText", "No summary found.")
-    state["info_summary"] = summary
-    state["info_source"] = source
+    state["info_summary"] = summary #Summary saved 
+    state["info_source"] = source   #Source Saved according to the *Resposnse And The via*
     return state
+
+
+
+#-------------------------------------------------------------------
+
 
 def requirements_node(state):
     if st and st.session_state.get("use_streamlit_requirements_node", False):
@@ -169,10 +190,17 @@ def requirements_node(state):
         f"Focus on clarity and variety — I want distinctly different ways to build this project. "
         f"Do not include any code. These ideas will be shared with the Technical Design team for evaluation, Also User will be Choosing One of the Stories or Approaches and Then They will be sent to the technical Design Team"
     )
+    
     state["requirements"] = requirements
     url = "http://localhost:11434/api/generate"
-    payload = {"model": "gemma:2b", "prompt": requirements}
+    
+    payload = {
+                "model": "gemma:2b",
+                "prompt": requirements
+                }
+    
     response = requests.post(url, json=payload, stream=True)
+    
     full_response = ""
     for line in response.iter_lines():
         if line:
@@ -184,20 +212,30 @@ def requirements_node(state):
     state["ollama_response"] = full_response
     return state
 
+
+#-------------------------------------------------------------------
+
+
+
 def manual_story_node(state):
     if st and st.session_state.get("use_streamlit_manual_story_node", False):
         story = st.session_state.get("manual_story_input", "")
     else:                                                                                       # All Nodes Explained In WorkFlow.py
-        story = input("Please enter your story: ")
+        story = input("Please State your Preferred Approach: ")
     state["chosen_story"] = story
     return state
+
+
+#-------------------------------------------------------------------
+
 
 def system_design_node(state):
     story = state["chosen_story"]
     if st and st.session_state.get("use_streamlit_system_design_node", False):
         user_prompt = st.session_state.get("system_design_input", "")
     else:
-        user_prompt = input("Enter your system design request (e.g., focus on scalability, security, etc.): ")   
+        user_prompt = input("Enter your system design request (e.g., focus on scalability, security, etc.): ")
+          
     final_prompt = (
         f"Given the following story, design a software system based on this additional request.\n\n"
         f"Story:\n{story}\n\n"
@@ -217,6 +255,10 @@ def system_design_node(state):
                 break
     state["system_design"] = full_response
     return state
+
+
+#-------------------------------------------------------------------
+
 
 def code_generation_node(state):
     if st and st.session_state.get("use_streamlit_code_generation_node", False):
@@ -256,6 +298,12 @@ def code_generation_node(state):
         return state
     return state
 
+
+
+#-------------------------------------------------------------------
+
+
+
 def next_node_after_generation(state):
     # FIX: Don't strip or set session_state with the same key as the widget!
     if st and st.session_state.get("use_streamlit_next_node_after_generation", False):
@@ -273,6 +321,11 @@ def next_node_after_generation(state):
         next_node = "Test Cases"
     st.session_state["next_node_after_generation_result"] = next_node
     return state
+
+
+
+#-------------------------------------------------------------------
+
 
 def code_explainer_node(state):
     generated_code = state.get("generated_code", "")
@@ -299,14 +352,19 @@ def code_explainer_node(state):
     state["code_explanation"] = full_response
     return state
 
+
+#-------------------------------------------------------------------
+
+
 def test_case_node(state):
     generated_code = state.get("generated_code","")
     if not generated_code:
         return state
+    
     if st and st.session_state.get("use_streamlit_test_case_node", False):
         user_prompt = st.session_state.get("test_case_input", "").strip()
     else:
-        user_prompt = input("Any specific Requirements? : \n if Not Press Enter").strip()
+        user_prompt = input("Any specific Requirements? : \n if Not Continue:").strip()
     prompt = (
         "You are a senior QA engineer.\n"
         "Given the following code, generate all necessary unit tests to ensure its correctness.\n"
@@ -317,9 +375,15 @@ def test_case_node(state):
         "- Do NOT include code explanations, donot Provide full code too , just mention Where what test thngs are required and Whatwill be the Test statement , only to test the code itself\n")
     prompt += f"There Are some Additional User Requirements : {user_prompt}" 
     prompt += f"Code To test = {generated_code}" "\n"
+    
     url = "http://localhost:11434/api/generate"
-    payload = {"model": "gemma:2b", "prompt": prompt}
+    
+    payload = {
+                "model": "gemma:2b",
+               "prompt": prompt
+               }
     response = requests.post(url,json=payload,stream=True)
+    
     full_response = ""
     for line in response.iter_lines():
         if line:
@@ -331,10 +395,15 @@ def test_case_node(state):
     state["test_cases"] = full_response
     return state
 
+
+#-------------------------------------------------------------------
+
+
 def requirements_generation_node(state):
     generated_code = state.get("generated_code", "")
     if not generated_code:
         return state
+    
     prompt = (
         "Given the following Python code, list all the external Python packages (pip) "
         "that need to be installed for it to work. Output only the package names, "
@@ -343,7 +412,14 @@ def requirements_generation_node(state):
         f"{generated_code}\n"
     )
     url = "http://localhost:11434/api/generate"
-    payload = {"model": "gemma:2b", "prompt": prompt}
+    
+    
+    payload = {
+                "model": "gemma:2b",
+               "prompt": prompt
+               }
+    
+    
     response = requests.post(url, json=payload, stream=True)
     full_response = ""
     for line in response.iter_lines():
@@ -358,11 +434,16 @@ def requirements_generation_node(state):
     state["requirements_txt"] = full_response.strip()
     return state
 
+
+#-------------------------------------------------------------------
+
 def documentation_node(state):
     info_summary = state.get("info_summary", "")
     system_design = state.get("system_design", "")
     requirements_txt = state.get("requirements_txt", "")
     generated_code = state.get("generated_code", "")
+    
+    
     prompt = (
         "You are an expert technical writer. Given the following project details, generate a clear, beginner-friendly README.md file.\n"
         f"Project Info Summary:\n{info_summary}\n\n"
@@ -377,9 +458,15 @@ def documentation_node(state):
         "- Usage examples if possible\n"
         "- Keep everything simple and clear for a beginner."
     )
+    
+    
     url = "http://localhost:11434/api/generate"
-    payload = {"model":"gemma:2b", "prompt":prompt}
-    response = requests.post(url, json=payload, stream=True)
+    payload = {
+                "model":"gemma:2b",
+               "prompt":prompt
+            }
+    response = requests.post(url, json=payload, stream=True) 
+    
     full_response = ""
     for line in response.iter_lines():
         if line:
@@ -401,29 +488,51 @@ if st:
     for idx, tab in enumerate(tab_objs):
         with tab:
             st.markdown(tab_progress(TABS[idx]), unsafe_allow_html=True)
-    #The Information Tab
-    with tab_objs[0]:
-        st.session_state["use_streamlit_info_node"] = True
-        st.markdown('<div class="section-header">Project Info</div>', unsafe_allow_html=True)
-        topic_input = st.text_input("Enter the topic you want to search information about:", key="topic_input")
-        info_source = st.selectbox("Choose information source:", ["duckduckgo", "wikipedia"])
-        st.session_state["state"]["info_source"] = info_source
-        if st.button("Fetch Info", key="fetch_info_btn"):
-            st.session_state["state"] = info_node(st.session_state["state"])
+            
+    
+     # Generalised Information For all The tabs:
+        #st.tabs() --> Into clear Tabs for all Nodes
+        # The * st.session_state preserves the data for users as they move ahead triggering actions 
+        # It is a Special Dictionary That helps Retaining and Bringing the Out put to the next State in Sequence If that requires Data from the previous Node/Action
+          
+        #There are st.buttons to trigger actions
+        #st.text_input() --> to take user Input in the form of Text So that,    
+        #there are if else statements that triggers when the button is pressed but if the data was not fetched From the Node , it will return error  
+
+        #There are markdownTabs to print the Output After The Defined Buttons state and Results are used for the same logic
+        #There are Download Buttons That helps us Download Them in our own directory. or it Automatically Gets Saved in your Working Directory.
+        
+        
+        
+    #-----------The Information Tab--------------
+    
+    with tab_objs[0]: #0th Tab thats info.
+        st.session_state["use_streamlit_info_node"] = True  #States that info node is used , This was stated in The Above, Node via StreamLit
+        st.markdown('<div class="section-header">Project Info</div>', unsafe_allow_html=True) #Heading Project Info
+        topic_input = st.text_input("Enter the topic you want to search information about:", key="topic_input") #Input Asking Line
+        info_source = st.selectbox("Choose information source:", ["duckduckgo", "wikipedia"]) #dropdown menu so that User can choose Between Wiki and Duck
+        st.session_state["state"]["info_source"] = info_source   #the Selected is stored here
+        if st.button("Fetch Info", key="fetch_info_btn"):  #if --> This Button Will be Used to trigger The Node
+            st.session_state["state"] = info_node(st.session_state["state"]) 
         if st.session_state["state"].get("info_summary"):
             st.markdown(f'<div class="ai-output">{st.session_state["state"]["info_summary"]}</div>', unsafe_allow_html=True)
+            #info fetched will be displayed in a styled output box.
+            #collects User Input and Triggers the action associated WIth the Input Mentioned in The Node.
+            
+    
+            
 
     # Here The Approaches According to tthe users need Will be Generated
-    with tab_objs[1]:
-        st.session_state["use_streamlit_requirements_node"] = True
+    with tab_objs[1]: #next Node's Tab.
+        st.session_state["use_streamlit_requirements_node"] = True 
         st.markdown('<div class="section-header">Requirements</div>', unsafe_allow_html=True)
         requirements_topic_input = st.text_input("Enter the project topic for requirements_node, It will be providing you the Approaches ", key="requirements_topic_input")
         if st.button("Submit Requirements", key="submit_reqs_btn"):
             st.session_state["state"] = requirements_node(st.session_state["state"])
         if st.session_state["state"].get("ollama_response"):
             st.markdown(f'<div class="ai-output">{st.session_state["state"]["ollama_response"]}</div>', unsafe_allow_html=True)
-
-    # Provide one of the Best Approaches That was generated in the Requiremnts TAB So that SysTem Design Can be Generated Accordingly.
+            
+       
     with tab_objs[2]:
         st.session_state["use_streamlit_manual_story_node"] = True
         st.markdown('<div class="section-header">User Story</div>', unsafe_allow_html=True)
@@ -432,6 +541,9 @@ if st:
             st.session_state["state"] = manual_story_node(st.session_state["state"])
         if st.session_state["state"].get("chosen_story"):
             st.markdown(f'<div class="ai-output">{st.session_state["state"]["chosen_story"]}</div>', unsafe_allow_html=True)
+            
+            
+            
 
     # Here The System Design Will be Created and then the Prompt will be Working on the BackEnd Via LLama..
     with tab_objs[3]:
@@ -442,6 +554,8 @@ if st:
             st.session_state["state"] = system_design_node(st.session_state["state"])
         if st.session_state["state"].get("system_design"):
             st.markdown(f'<div class="ai-output">{st.session_state["state"]["system_design"]}</div>', unsafe_allow_html=True)
+            
+            
 
         #Generate The Code According to the Requirments and System Design That User Has Selected
     with tab_objs[4]:
@@ -454,8 +568,10 @@ if st:
         code = st.session_state["state"].get("generated_code")
         if code:
             st.code(code, language="python")
+            
+            
 
-    # 
+    # Actions to choose from ....a>regenerate Code , b>Explain Code , c>go to the next node
     with tab_objs[5]:
         st.session_state["use_streamlit_next_node_after_generation"] = True
         st.markdown('<div class="section-header">Next Step</div>', unsafe_allow_html=True)
@@ -464,13 +580,15 @@ if st:
             unsafe_allow_html=True
         )
         next_options = ["Regenerate the code", "Get an explanation of the generated code", "Go to test cases"]
-        next_node_after_generation_choice = st.radio("Next action", next_options, key="next_node_after_generation_choice")
+        next_node_after_generation_choice = st.radio("Next action", next_options, key="next_node_after_generation_choice")        #What is 
         if st.button("Continue to Next Step", key="continue_nextstep_btn"):
-            # FIX: Don't set session_state with the same key as a widget!
+            
             st.session_state["state"] = next_node_after_generation(st.session_state["state"])
-            st.rerun()
+            st.rerun() #This is used so that the Node Can be iterated once Again.
 
-    # -------- Code Explanation Tab -----------
+    
+    
+    
     with tab_objs[6]:
         st.session_state["use_streamlit_code_explainer_node"] = True
         st.markdown('<div class="section-header">Code Explanation</div>', unsafe_allow_html=True)
@@ -479,8 +597,10 @@ if st:
         code_exp = st.session_state["state"].get("code_explanation")
         if code_exp:
             st.markdown(f'<div class="ai-output">{code_exp}</div>', unsafe_allow_html=True)
+            
 
-    # -------- Test Cases Tab -----------
+
+
     with tab_objs[7]:
         st.session_state["use_streamlit_test_case_node"] = True
         st.markdown('<div class="section-header">Test Cases</div>', unsafe_allow_html=True)
@@ -490,6 +610,9 @@ if st:
         tests = st.session_state["state"].get("test_cases")
         if tests:
             st.markdown(f'<div class="ai-output">{tests}</div>', unsafe_allow_html=True)
+            
+            
+            
 
     # -------- Requirements.txt Tab -----------
     with tab_objs[8]:
@@ -500,6 +623,9 @@ if st:
         if reqs:
             st.code(reqs, language="text")
             st.download_button("Download requirements.txt", reqs, "requirements.txt")
+            
+            
+            
 
     # -------- README Tab -----------
     with tab_objs[9]:
@@ -510,6 +636,8 @@ if st:
         if readme:
             st.markdown(f'<div class="markdown-preview">{readme}</div>', unsafe_allow_html=True)
             st.download_button("Download README.md", readme, "README.md")
+            
+            
 
     st.markdown(f"""
         <hr>
